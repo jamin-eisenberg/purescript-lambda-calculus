@@ -1,6 +1,7 @@
 module Parser (parser) where
 
 import Prelude
+
 import Ast (Expression(..), Identifier, isLegalIdentifierChar, mkIdentifier)
 import Control.Alt ((<|>))
 import Control.Lazy as Control.Lazy
@@ -10,7 +11,7 @@ import Data.Maybe as Maybe
 import Data.String.CodeUnits as String
 import Parsing (Parser)
 import Parsing (liftMaybe) as Parsing
-import Parsing.Combinators (chainl1, choice, many1, optionMaybe, sepBy1) as Parsing
+import Parsing.Combinators (chainl1, choice, many1, optionMaybe) as Parsing
 import Parsing.String (char, eof, satisfy) as Parsing
 import Parsing.String.Basic (skipSpaces, space) as Parsing
 
@@ -44,13 +45,14 @@ abstraction :: Parser String Expression
 abstraction = do
   _ <- Parsing.char '\\'
   Parsing.skipSpaces
-  parameter <- Parsing.sepBy1 identifier (Parsing.many1 Parsing.space)
+  signature :: (Expression -> Expression) <-
+    Parsing.chainl1 (Abstraction <$> identifier) (Parsing.many1 Parsing.space $> compose)
   Parsing.skipSpaces
   _ <- Parsing.char '.'
   Parsing.skipSpaces
   body <- expression
   Parsing.skipSpaces
-  pure $ Abstraction parameter body
+  pure $ signature body
 
 variable :: Parser String Expression
 variable = identifier <#> Variable

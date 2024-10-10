@@ -29,7 +29,7 @@ isLegalIdentifierChar c = not $ Array.elem c [ '\\', '\r', '\n', '\t', ' ', '(',
 
 data Expression
   = Variable Identifier
-  | Abstraction (NonEmptyList Identifier) Expression
+  | Abstraction Identifier Expression
   | Application Expression Expression
 
 derive instance Eq Expression

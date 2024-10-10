@@ -22,7 +22,11 @@ main = runSpecAndExitProcess [ consoleReporter ] do
   describe "purescript-lambda-calculus" do
     describe "parse" do
       it "plain variable" do
-        runParser "x" parser `shouldEqual` Right (Variable $ ident "x")
+        runParser "x" parser `shouldEqual` (Right $ Variable $ ident "x")
+      it "identity" do
+        runParser "\\x.x" parser `shouldEqual` (Right $ Abstraction (ident "x") (Variable $ ident "x"))
+      it "const" do
+        runParser "\\x y.x" parser `shouldEqual` (Right $ Abstraction (ident "x") (Abstraction (ident "y") (Variable $ ident "x")))
 
     describe "interpret" do
       pending "todo"
