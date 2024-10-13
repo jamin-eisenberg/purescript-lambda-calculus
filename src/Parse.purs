@@ -1,23 +1,15 @@
-module Parse where
+module Parse (parser) where
 
 import Prelude
 
 import Ast (Expression(..))
-import Control.Alt ((<|>))
-import Control.Lazy as Control
 import Control.Lazy as Control.Lazy
-import Data.Array as Array
 import Data.List (List)
-import Data.List.NonEmpty as NonEmptyList
-import Data.Maybe as Maybe
-import Data.String.CodeUnits as String
 import Parsing (Parser)
-import Parsing (fail, liftMaybe) as Parsing
-import Parsing.Combinators (between, chainl, chainl1, choice, many1, optionMaybe) as Parsing
-import Parsing.String (char, satisfy) as Parsing
-import Parsing.String.Basic (skipSpaces, space) as Parsing
-import Parsing.Token (eof, match, token, when) as Parsing
-import Tokenize (Identifier, Token, TokenElement(..), identifier, isName)
+import Parsing (fail) as Parsing
+import Parsing.Combinators (between, chainl1, choice) as Parsing
+import Parsing.Token (eof, when) as Parsing
+import Tokenize (Identifier, Token, TokenElement(..), isName)
 
 type Tokens = List Token
 
@@ -31,7 +23,7 @@ expression :: Parser Tokens Expression
 expression = Parsing.choice
   [ variable
   , Control.Lazy.defer \_ -> abstraction
-  , Control.Lazy.defer \_ -> (applicationWithParens <|> applicationWithoutParens)
+  , Control.Lazy.defer \_ -> applicationWithParens
   ]
 
 applicationWithoutParens :: Parser Tokens Expression

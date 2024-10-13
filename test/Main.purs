@@ -3,15 +3,16 @@ module Test.Main (main) where
 import Prelude
 
 import Ast (Expression(..), prettyPrint)
+import Control.Monad.Error.Class (class MonadThrow)
 import Data.Array as Array
 import Data.Either (Either(..))
-import Data.List (List(..))
 import Data.Maybe (fromJust)
 import Effect (Effect)
+import Effect.Exception (Error)
 import Parse (parser)
 import Parsing (ParseError(..), Position(..), runParser)
 import Partial.Unsafe (unsafePartial)
-import Test.Spec (Spec, describe, describeOnly, it, itOnly, pending, pending')
+import Test.Spec (describe, it, pending, pending')
 import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.Assertions as Spec
 import Test.Spec.Reporter.Console (consoleReporter)
@@ -24,6 +25,7 @@ ident s = unsafePartial $ fromJust $ mkIdentifier s
 var :: String -> Expression
 var s = Variable $ ident s
 
+shouldParseAs ∷ ∀ (m29 ∷ Type -> Type). MonadThrow Error m29 ⇒ String → Expression → m29 Unit
 shouldParseAs expressionString expectedExpression =
   let
     parsed = do
@@ -32,6 +34,7 @@ shouldParseAs expressionString expectedExpression =
   in
     parsed `shouldEqual` (Right expectedExpression)
 
+shouldNotParse ∷ ∀ (m47 ∷ Type -> Type). MonadThrow Error m47 ⇒ String → String → m47 Unit
 shouldNotParse expressionString expectedErrorMessage =
   let
     parsed = do
@@ -43,6 +46,7 @@ shouldNotParse expressionString expectedErrorMessage =
         actualErrorMessage `shouldEqual` expectedErrorMessage
       Right expr -> Spec.fail $ "Parsed successfully, unexpectedly. Expr:\n\t" <> prettyPrint expr
 
+shouldTokenizeAs ∷ ∀ (m3 ∷ Type -> Type). MonadThrow Error m3 ⇒ String → Array { element ∷ TokenElement, pos ∷ Position } → m3 Unit
 shouldTokenizeAs expressionString expectedTokens =
   (Array.fromFoldable <$> runParser expressionString tokens) `shouldEqual` Right expectedTokens
 
@@ -114,10 +118,10 @@ main = runSpecAndExitProcess [ consoleReporter ] do
       "x y" `shouldParseAs` Application (var "x") (var "y")
     pending' "no parens left-associative application" do
       "x y z" `shouldParseAs` Application (Application (var "x") (var "y")) (var "z")
-    -- it "λ symbol allowed as abstraction start" do
-    --   "λx.x" `shouldParseAs` Abstraction (ident "x") (var "x")
-    -- it "λ disallowed as variable" do
-    --   "λ" `shouldNotParse` "?"
+    it "λ symbol allowed as abstraction start" do
+      "λx.x" `shouldParseAs` Abstraction (ident "x") (var "x")
+    it "λ disallowed as variable" do
+      "λ" `shouldNotParse` "Unexpected EOF"
 
     describe "interpret" do
       pending "todo"

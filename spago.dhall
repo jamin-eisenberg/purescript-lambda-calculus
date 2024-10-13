@@ -17,6 +17,8 @@ to generate this file without the comments in this block.
   , "control"
   , "effect"
   , "either"
+  , "exceptions"
+  , "foldable-traversable"
   , "lists"
   , "maybe"
   , "parsing"
@@ -25,6 +27,8 @@ to generate this file without the comments in this block.
   , "spec"
   , "spec-node"
   , "strings"
+  , "transformers"
+  , "tuples"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
